@@ -1,0 +1,158 @@
+{
+  "name": "Tough.ai News Curation Engine",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e292613d-5e4b-4b1e-b1d6-6007609bc44d",
+      "name": "When clicking \"Test workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/rss",
+        "options": {}
+      },
+      "id": "df97e261-726e-4b72-9350-3f990e27fbdc",
+      "name": "Hacker News RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const sortedItems = items.sort((a, b) => new Date(b.json.isoDate) - new Date(a.json.isoDate));\nreturn sortedItems.slice(0, 3);"
+      },
+      "id": "92785aaf-521d-4b2e-8b2c-bb1f342fdcf5",
+      "name": "Top 3 Fresh Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "af259c72-b12c-4261-9505-6e9c50da6dbd",
+      "name": "Scrape Webpage Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:11434/api/generate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "qwen2.5:14b"
+            },
+            {
+              "name": "stream",
+              "value": "={{ false }}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ \"System Instructions: You are the backend intelligence agent for tough.ai. Your objective is to extract practical execution metrics from the provided raw web page text. CRITICAL FILTERING CONSTRAINTS: 1. Completely IGNORE macroeconomics, corporate funding rounds, legal updates, philosophical debates, and generic hype announcements. 2. EXCLUSIVELY focus on technical assets: novel API integrations, functional automation use-cases (n8n/Make), GitHub code repositories, terminal CLI utilities, or local LLM acceleration frameworks. 3. If the article contains absolutely no actionable tool or engineering workflow snippet for a full-stack web developer or automated business owner, reply with exactly one word: SKIP. IF THE ARTICLE PASSES THE FILTER, output exactly this Markdown syntax structure: ### 📢 [Create a highly compelling, developer-centric title] **⚡ The Core Tech:** [1 concise sentence defining exactly what was released, built, or updated] **🛠️ Tactical Value:** [Why a MERN-stack developer or modern entrepreneur needs to use this immediately] **💡 Content Hook Idea:** *Hook:* [High engagement initial line for LinkedIn/X] *Core Insight:* [The contrarian or practical opinion] *Call To Action:* [A deep technical question to drive comment velocity] Raw Article Text Data to Analyze: \" + $json.data.slice(0, 3500) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        896,
+        0
+      ],
+      "id": "1a811770-6315-4e4d-81d7-f3380d7aaa92",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking \"Test workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Hacker News RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hacker News RSS": {
+      "main": [
+        [
+          {
+            "node": "Top 3 Fresh Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top 3 Fresh Articles": {
+      "main": [
+        [
+          {
+            "node": "Scrape Webpage Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Webpage Text": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c7996a01-90bb-4717-9c65-f0b6e4cb5982",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "91638c62646d8635a3fd41f4930c0f952724d1710ad32e9375b65a2ecba4d010"
+  },
+  "id": "7mYu45M4zHn16PHB",
+  "tags": []
+}
