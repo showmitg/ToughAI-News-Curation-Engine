@@ -2,17 +2,6 @@
   "name": "Tough.ai News Curation Engine",
   "nodes": [
     {
-      "parameters": {},
-      "id": "e292613d-5e4b-4b1e-b1d6-6007609bc44d",
-      "name": "When clicking \"Test workflow\"",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ]
-    },
-    {
       "parameters": {
         "url": "https://news.ycombinator.com/rss",
         "options": {}
@@ -22,7 +11,7 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1,
       "position": [
-        224,
+        432,
         0
       ]
     },
@@ -35,7 +24,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
+        656,
         0
       ]
     },
@@ -58,7 +47,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        672,
+        880,
         0
       ]
     },
@@ -88,26 +77,89 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        896,
+        1104,
         0
       ],
       "id": "1a811770-6315-4e4d-81d7-f3380d7aaa92",
       "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c643b7e1-e930-4977-acdc-befe3e48dc7b",
+              "leftValue": "={{ $json.response }}",
+              "rightValue": "SKIP",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1312,
+        0
+      ],
+      "id": "90f1ea68-bf89-43a6-813c-58003caf7093",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "6229512274",
+        "text": "={{ $json.response }}\n\nLink: {{ $json.url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1520,
+        -96
+      ],
+      "id": "59e9fe37-21be-446e-84df-798d413abaf5",
+      "name": "Send a text message",
+      "webhookId": "49ff6969-8b77-46f7-a3d9-2a0da7efb1e7",
+      "credentials": {
+        "telegramApi": {
+          "id": "QM0nh0GeAkjQE5sQ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 23
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5b12747b-931a-47ea-931b-88e1cd1d3da1",
+      "name": "Schedule Trigger"
     }
   ],
   "pinData": {},
   "connections": {
-    "When clicking \"Test workflow\"": {
-      "main": [
-        [
-          {
-            "node": "Hacker News RSS",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Hacker News RSS": {
       "main": [
         [
@@ -140,15 +192,48 @@
           }
         ]
       ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Hacker News RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "c7996a01-90bb-4717-9c65-f0b6e4cb5982",
+  "versionId": "252ee638-b66e-4b90-a895-d7c6f3a7214e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "91638c62646d8635a3fd41f4930c0f952724d1710ad32e9375b65a2ecba4d010"
